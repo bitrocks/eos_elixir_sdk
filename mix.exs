@@ -24,7 +24,7 @@ defmodule EosElixirSdk.MixProject do
       # http
       {:tesla, "~> 1.2"},
       {:jason, "~> 1.1"},
-      
+
       # crypto
       {:libsecp256k1, [github: "peatio/libsecp256k1", manager: :rebar, optional: true]}
     ]
