@@ -1,6 +1,24 @@
 # EosElixirSdk
 
-**TODO: Add description**
+## Feature
+1. RPC
+    1. get_info/0
+    2. get_account/1
+    3. get_block/1
+    4. get_transaction/1
+    5. ...
+
+2. Crypto
+    1. generate keypair
+    2. address validity check
+
+3. Serialize/Deserialize
+
+tbd
+
+4. Sign Transaction
+
+tbd
 
 ## Installation
 
@@ -15,7 +33,13 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/eos_elixir_sdk](https://hexdocs.pm/eos_elixir_sdk).
+## Config
+
+    ```
+    config :eos_elixir_sdk, :rpc,
+      conn: %{
+        endpoint: "https://public.eosinfra.io"
+      },
+      timeout: 5_000
+    ```
 
