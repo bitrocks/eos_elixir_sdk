@@ -42,7 +42,7 @@ defmodule EosElixirSdk.Rpc do
   end
 
   defp build_url(endpoint, method) when method in [:get_transaction, :get_actions],
-    do: (endpoint <> "/v1/history/#{method}") |> IO.inspect()
+    do: endpoint <> "/v1/history/#{method}"
 
   defp build_url(endpoint, method), do: endpoint <> "/v1/chain/#{method}"
 
