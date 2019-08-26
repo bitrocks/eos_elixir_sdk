@@ -25,6 +25,11 @@ defmodule EosElixirSdk.Rpc do
     call(:get_table_rows, body)
   end
 
+  def push_transaction(raw_transaction) do
+    body = Jason.decode!(raw_transaction)
+    call(:push_transaction, body)
+  end
+
   # todo http request, response handle
 
   defp call(method, body) do
@@ -37,7 +42,7 @@ defmodule EosElixirSdk.Rpc do
          {:ok, %{} = body} <- Jason.decode(body) do
       {:ok, body}
     else
-      error -> handle_error(error)
+      {:ok, %{"code" => 500, "error" => error}} -> handle_error(error)
     end
   end
 
@@ -46,5 +51,10 @@ defmodule EosElixirSdk.Rpc do
 
   defp build_url(endpoint, method), do: endpoint <> "/v1/chain/#{method}"
 
+  defp handle_error(%{"code" => 3_040_005, "name" => "expired_tx_exception"}),
+    do: {:error, :expired_tx_exception}
+
   defp handle_error({:error, %Jason.DecodeError{}}), do: {:error, :json_decode_error}
+  defp handle_error({:error, :socket_closed_remotely}), do: {:error, :socket_closed_remotely}
+  defp handle_error(error), do: "#{inspect(error)}"
 end
