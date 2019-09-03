@@ -20,9 +20,14 @@ defmodule EosElixirSdk.Rpc do
     call(:get_transaction, body)
   end
 
-  def get_table_rows(code, scope, table, limit) do
+  def get_table_rows(code, scope, table, limit \\ 10) do
     body = %{"code" => code, "scope" => scope, "table" => table, "json" => true, "limit" => limit}
     call(:get_table_rows, body)
+  end
+
+  def get_currency_balance(account, code, symbol \\ "EOS") do
+    body = %{"code" => code, "account" => account, "symbol" => symbol}
+    call(:get_currency_balance, body)
   end
 
   def push_transaction(raw_transaction) do
@@ -43,6 +48,7 @@ defmodule EosElixirSdk.Rpc do
       {:ok, body}
     else
       {:ok, %{"code" => 500, "error" => error}} -> handle_error(error)
+      error -> handle_error(error)
     end
   end
 
@@ -51,10 +57,29 @@ defmodule EosElixirSdk.Rpc do
 
   defp build_url(endpoint, method), do: endpoint <> "/v1/chain/#{method}"
 
+  # get_currency_balance return value
+  defp handle_error({:ok, value}) when is_list(value), do: {:ok, value}
+
+  # https://github.com/EOSIO/eos/blob/3fddb727b8f3615917707281dfd3dd3cc5d3d66d/libraries/chain/include/eosio/chain/exceptions.hpp
   defp handle_error(%{"code" => 3_040_005, "name" => "expired_tx_exception"}),
     do: {:error, :expired_tx_exception}
 
-  defp handle_error({:error, %Jason.DecodeError{}}), do: {:error, :json_decode_error}
+  defp handle_error(%{"code" => 3_040_008, "name" => "tx_duplicate"}),
+    do: {:error, :tx_duplicate}
+
+  defp handle_error(%{"code" => _code, "name" => name}),
+    do: {:error, String.to_atom(name)}
+
+  defp handle_error({:error, %Jason.DecodeError{data: data}}) do
+    norm_body = for(c <- String.codepoints(data), String.valid?(c), into: "", do: c)
+
+    with {:ok, %{} = body} <- Jason.decode(norm_body) do
+      {:ok, body}
+    else
+      _error -> {:error, :json_decode_error}
+    end
+  end
+
   defp handle_error({:error, :socket_closed_remotely}), do: {:error, :socket_closed_remotely}
   defp handle_error(error), do: "#{inspect(error)}"
 end
