@@ -44,11 +44,18 @@ defmodule EosElixirSdk.Rpc do
            :eos_elixir_sdk |> Application.get_env(:rpc) |> Keyword.get(:conn),
          url = build_url(endpoint, method),
          {:ok, %{body: body}} <- post(url, Jason.encode!(body), headers),
-         {:ok, %{} = body} <- Jason.decode(body) do
+         {:ok, %{} = body} <- Jason.decode(body),
+         {:check_error, body, true} <- {:check_error, body, is_nil(body["error"])} do
       {:ok, body}
     else
-      {:ok, %{"code" => 500, "error" => error}} -> handle_error(error)
-      error -> handle_error(error)
+      {:ok, error} ->
+        handle_error(error)
+
+      {:check_error, %{"code" => 500, "error" => error}, false} ->
+        handle_error(error)
+
+      error ->
+        handle_error(error)
     end
   end
 
