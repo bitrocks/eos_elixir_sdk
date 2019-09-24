@@ -51,7 +51,7 @@ defmodule EosElixirSdk.Rpc do
       {:ok, error} ->
         handle_error(error)
 
-      {:check_error, %{"code" => 500, "error" => error}, false} ->
+      {:check_error, %{"code" => _code, "error" => error}, false} ->
         handle_error(error)
 
       error ->
