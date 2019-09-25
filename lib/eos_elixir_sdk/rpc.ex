@@ -74,6 +74,15 @@ defmodule EosElixirSdk.Rpc do
   defp handle_error(%{"code" => 3_040_008, "name" => "tx_duplicate"}),
     do: {:error, :tx_duplicate}
 
+  defp handle_error(%{"code" => 3_050_003, "name" => "eosio_assert_message_exception"}),
+    do: {:error, :eosio_assert_message_exception}
+
+  defp handle_error(%{"code" => 3_090_003, "name" => "unsatisfied_authorization"}),
+    do: {:error, :unsatisfied_authorization}
+    
+    defp handle_error(%{"code" => 3040011, "name" => "tx_not_found"}),
+    do: {:error, :tx_not_found}
+
   defp handle_error(%{"code" => _code, "name" => name}),
     do: {:error, String.to_atom(name)}
 
